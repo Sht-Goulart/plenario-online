@@ -1,106 +1,94 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { toast } from "@/hooks/use-toast"
+import { Building2, User, Settings, LogOut, Menu, X } from "lucide-react"
+import ProfileForm from "./profile-form"
+import AccountInfo from "./account-info"
 
 export default function Dashboard() {
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<"profile" | "account">("profile")
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  // Mock user data
-  const [userData, setUserData] = useState({
-    name: "João Silva",
-    email: "joao.silva@exemplo.com",
-    phone: "(11) 98765-4321",
-    bio: "Membro do conselho desde 2020.",
-    role: "Conselheiro",
-  })
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      toast({
-        title: "Perfil atualizado",
-        description: "Suas informações foram atualizadas com sucesso.",
-      })
-    }, 1000)
+  const handleLogout = () => {
+    // Simulate logout
+    router.push("/")
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setUserData((prev) => ({ ...prev, [name]: value }))
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen)
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <h2 className="mb-6 text-2xl font-bold">Editar Perfil</h2>
+    <div className="flex min-h-screen flex-col bg-gray-50 md:flex-row">
+      {/* Mobile Header */}
+      <div className="flex items-center justify-between border-b bg-white p-4 md:hidden">
+        <div className="flex items-center space-x-2">
+          <Building2 className="h-6 w-6 text-primary" />
+          <h1 className="text-lg font-bold">PLENÁRIO ON-LINE</h1>
+        </div>
+        <Button variant="ghost" size="icon" onClick={toggleMobileMenu}>
+          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
+      </div>
 
-      <Card>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-6 p-6">
-            <div className="flex flex-col items-center space-y-4 sm:flex-row sm:items-start sm:space-x-4 sm:space-y-0">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src="/placeholder.svg?height=96&width=96" alt={userData.name} />
-                <AvatarFallback>
-                  {userData.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 space-y-2">
-                <Label htmlFor="avatar">Foto de Perfil</Label>
-                <Input id="avatar" type="file" accept="image/*" />
-                <p className="text-sm text-muted-foreground">JPG, PNG ou GIF. Tamanho máximo de 2MB.</p>
-              </div>
-            </div>
+      {/* Sidebar */}
+      <div
+        className={`${
+          isMobileMenuOpen ? "block" : "hidden"
+        } w-full border-r bg-white p-4 md:block md:w-64 md:min-h-screen`}
+      >
+        <div className="hidden items-center space-x-2 md:mb-8 md:flex">
+          <Building2 className="h-6 w-6 text-primary" />
+          <h1 className="text-lg font-bold">PLENÁRIO ON-LINE</h1>
+        </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome Completo</Label>
-                <Input id="name" name="name" value={userData.name} onChange={handleChange} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
-                <Input id="email" name="email" type="email" value={userData.email} onChange={handleChange} required />
-              </div>
-            </div>
+        <div className="space-y-1">
+          <Button
+            variant={activeTab === "profile" ? "secondary" : "ghost"}
+            className="w-full justify-start"
+            onClick={() => {
+              setActiveTab("profile")
+              setIsMobileMenuOpen(false)
+            }}
+          >
+            <User className="mr-2 h-4 w-4" />
+            Perfil
+          </Button>
+          <Button
+            variant={activeTab === "account" ? "secondary" : "ghost"}
+            className="w-full justify-start"
+            onClick={() => {
+              setActiveTab("account")
+              setIsMobileMenuOpen(false)
+            }}
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            Informações da Conta
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-red-500 hover:bg-red-50 hover:text-red-600"
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Sair
+          </Button>
+        </div>
+      </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input id="phone" name="phone" value={userData.phone} onChange={handleChange} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Cargo</Label>
-                <Input id="role" name="role" value={userData.role} onChange={handleChange} readOnly disabled />
-              </div>
-            </div>
+      {/* Main Content */}
+      <div className="flex-1 p-4 md:p-8">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="mb-6 text-2xl font-bold">
+            {activeTab === "profile" ? "Editar Perfil" : "Informações da Conta"}
+          </h2>
 
-            <div className="space-y-2">
-              <Label htmlFor="bio">Biografia</Label>
-              <Textarea id="bio" name="bio" value={userData.bio} onChange={handleChange} rows={4} />
-            </div>
-
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Salvando..." : "Salvar Alterações"}
-              </Button>
-            </div>
-          </CardContent>
-        </form>
-      </Card>
+          {activeTab === "profile" ? <ProfileForm /> : <AccountInfo />}
+        </div>
+      </div>
     </div>
   )
 }
